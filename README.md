@@ -5,3 +5,4 @@ This repository contains my FastAPI learning projects.
 ## Projects
 
 - Project 01 - Books CRUD API
+- Project 02 - Book API
