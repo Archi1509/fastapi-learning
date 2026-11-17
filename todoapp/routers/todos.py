@@ -41,6 +41,8 @@ def create_todo(db: db_dependancy, todo_request: TodoRequest):
     todo_model = ToDos(**todo_request.dict())
     db.add(todo_model)
     db.commit()
+    db.refresh(todo_model)
+    return todo_model
 
 @router.put("/todos/{todo_id}", status_code=status.HTTP_204_NO_CONTENT)
 def update_todo(db: db_dependancy, todo_request: TodoRequest, todo_id: int= Path(gt=0)):
