@@ -56,6 +56,16 @@ def create_user(db: db_dependancy, create_user_request: CreateUserRequest):
         role=create_user_request.role,
         is_active=True,
     )
+    existing_user = db.query(Users).filter(
+        (Users.email == create_user_request.email) |
+        (Users.username == create_user_request.username)
+    ).first()
+
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Username or email already exists"
+        )
     db.add(create_user_model)
     db.commit()
 
