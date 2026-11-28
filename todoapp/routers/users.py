@@ -31,18 +31,25 @@ class UpdatePasswordRequest(BaseModel):
     password: str
     new_password: str
 
+class UpdatePhoneNumber(BaseModel):
+    new_phone_number: str = Field(
+        min_length=10,
+        max_length=10,
+        pattern=r'^[0-9]{10}$'
+    )
+
 @router.get('/user', status_code=status.HTTP_200_OK)
 def get_user(db:db_dependancy, user: user_dependancy):
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,)
-    return db.query(Users).filter(Users.id == user.get('user_id')).first()
+    return db.query(Users).filter(Users.id == user.get('id')).first()
 
 @router.put('/password', status_code=status.HTTP_204_NO_CONTENT)
 def update_current_user_password(db: db_dependancy, user: user_dependancy, password_request: UpdatePasswordRequest):
     if user is None:
         raise HTTPException(status_code=401)
 
-    current_user = db.query(Users).filter( Users.id == user.get('user_id')).first()
+    current_user = db.query(Users).filter( Users.id == user.get('id')).first()
 
     if not bcrypt_context.verify(password_request.password, current_user.hashed_password):
         raise HTTPException(status_code=400, detail='Incorrect current password')
@@ -51,3 +58,13 @@ def update_current_user_password(db: db_dependancy, user: user_dependancy, passw
 
     db.add(current_user)
     db.commit()
+
+@router.put('/phone_number', status_code=status.HTTP_204_NO_CONTENT)
+def update_current_user_phone_number(db: db_dependancy, user: user_dependancy, phone_request: UpdatePhoneNumber):
+    if user is None:
+        raise HTTPException(status_code=401)
+    current_user = db.query(Users).filter(Users.id == user.get('id')).first()
+    current_user.phone_number = phone_request.new_phone_number
+    db.add(current_user)
+    db.commit()
+

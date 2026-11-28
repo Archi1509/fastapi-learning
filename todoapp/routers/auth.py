@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from database import SessionLocal
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from models import Users
 from fastapi import APIRouter, Depends
 from passlib.context import CryptContext
@@ -40,6 +40,11 @@ class CreateUserRequest(BaseModel):
     first_name: str
     last_name: str
     role: str
+    phone_number: str = Field(
+        min_length=10,
+        max_length=10,
+        pattern=r'^[0-9]{10}$'
+    )
 
 class Token(BaseModel):
     access_token: str
@@ -55,6 +60,7 @@ def create_user(db: db_dependancy, create_user_request: CreateUserRequest):
         last_name=create_user_request.last_name,
         role=create_user_request.role,
         is_active=True,
+        phone_number=create_user_request.phone_number,
     )
     existing_user = db.query(Users).filter(
         (Users.email == create_user_request.email) |
